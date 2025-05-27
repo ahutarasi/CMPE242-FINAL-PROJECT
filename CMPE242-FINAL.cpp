@@ -2,9 +2,13 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
 
 // Global counter to track the number of operations during sorting
-int operationCount = 0; 
+int operationCount = 0;
 
 // Swap function to exchange two elements in the array
 void swapElements(int &first, int &second) {
@@ -15,77 +19,124 @@ void swapElements(int &first, int &second) {
 }
 
 // Function to maintain the heap property for heap sort (heapify)
-void heapify(std::vector<int> &arr, int heapSize, int rootIndex) {
+void heapify(vector<int> &arr, int heapSize, int rootIndex) {
     int largest = rootIndex; // Assume the root is the largest
     int leftChild = 2 * rootIndex + 1; // Left child index
     int rightChild = 2 * rootIndex + 2; // Right child index
 
-    operationCount++; // Count the comparison for the left child
+    operationCount++; // Comparison for left child
     if (leftChild < heapSize && arr[leftChild] > arr[largest]) {
-        largest = leftChild; // Left child is larger
+        largest = leftChild;
     }
 
-    operationCount++; // Count the comparison for the right child
+    operationCount++; // Comparison for right child
     if (rightChild < heapSize && arr[rightChild] > arr[largest]) {
-        largest = rightChild; // Right child is larger
+        largest = rightChild;
     }
 
-    // If the largest element is not the root, swap and heapify the affected subtree
+    // If the largest element is not the root, swap and heapify
     if (largest != rootIndex) {
         swapElements(arr[rootIndex], arr[largest]);
-        heapify(arr, heapSize, largest); // Recursively heapify the affected subtree
+        heapify(arr, heapSize, largest); // Recursively heapify
     }
 }
 
 // Function to perform the heapsort algorithm
-void heapSort(std::vector<int> &arr) {
+void heapSort(vector<int> &arr) {
     int arrSize = arr.size();
 
-    // Build the heap (rearrange the array to satisfy the heap property)
+    // Build max heap
     for (int i = arrSize / 2 - 1; i >= 0; i--) {
-        heapify(arr, arrSize, i); // Build the heap from the bottom up
+        heapify(arr, arrSize, i);
     }
 
-    // Extract elements one by one from the heap and rebuild the heap
+    // Extract elements one by one
     for (int i = arrSize - 1; i > 0; i--) {
-        swapElements(arr[0], arr[i]); // Swap the root (largest element) with the last element
-        heapify(arr, i, 0); // Heapify the reduced heap to maintain the heap property
+        swapElements(arr[0], arr[i]); // Move max to end
+        heapify(arr, i, 0); // Heapify reduced heap
     }
 }
 
-// Utility function to print the contents of the array
-void printArray(const std::vector<int> &arr) {
+// Utility function to print array contents
+void printArray(const vector<int> &arr) {
     for (int element : arr) {
-        std::cout << element << " ";
+        cout << element << " ";
     }
-    std::cout << std::endl;
+    cout << endl;
 }
 
-// Utility function to generate a random integer array
-std::vector<int> generateRandomArray(int size, int range) {
-    std::vector<int> arr(size);
+// Generate random integer array
+vector<int> generateRandomArray(int size, int range) {
+    vector<int> arr(size);
     for (int &num : arr) {
-        num = rand() % range; // Fill with random numbers
+        num = rand() % range;
     }
     return arr;
 }
 
+// Task 2: Run complexity experiments and print a formatted table
+void runExperiment(const vector<int>& sizes) {
+    cout << "\n--- Complexity Experiment Results ---\n";
+    cout << left << setw(12) << "Array Size"
+         << setw(20) << "Operation Count"
+         << setw(15) << "n"
+         << setw(15) << "n log n"
+         << setw(15) << "n^2"
+         << setw(15) << "log n"
+         << "\n";
+
+    cout << string(92, '-') << "\n";
+
+    for (int size : sizes) {
+        vector<int> testArray = generateRandomArray(size, 1000);
+        operationCount = 0;
+        heapSort(testArray);
+
+        double n = size;
+        double logn = log2(n);
+        double nlogn = n * logn;
+        double nsquared = n * n;
+
+        cout << left << setw(12) << size
+             << setw(20) << operationCount
+             << setw(15) << (int)n
+             << setw(15) << (int)nlogn
+             << setw(15) << (int)nsquared
+             << setw(15) << (int)logn
+             << "\n";
+    }
+}
+
 int main() {
-    srand(static_cast<unsigned int>(time(0))); // Initialize random seed
+    srand(static_cast<unsigned int>(time(0))); // Seed random generator
 
-    // Generate an array of random integers
-    std::vector<int> data = generateRandomArray(20, 100);
+    // Task 1 – Heapsort Example
+    cout << "=========================\n";
+    cout << " CMPE242 Term Project 2\n";
+    cout << " Task 1 – Heapsort Example\n";
+    cout << "=========================\n";
 
-    std::cout << "Original Array:\n";
-    printArray(data); // Display the original array
+    vector<int> data = generateRandomArray(20, 100);
 
-    operationCount = 0; // Reset the operation counter
-    heapSort(data); // Sort the array using heap sort
+    cout << "\nOriginal Array:\n";
+    printArray(data);
 
-    std::cout << "Sorted Array:\n";
-    printArray(data); // Display the sorted array
+    operationCount = 0;
+    heapSort(data);
 
-    std::cout << "Total Operations Count: " << operationCount << std::endl; // Display the operation count
+    cout << "\nSorted Array:\n";
+    printArray(data);
+
+    cout << "\nTotal Operations Count (Task 1): " << operationCount << endl;
+    cout << "(Includes swaps and comparisons)\n";
+
+    // Task 2 – Complexity Analysis
+    cout << "\n=========================\n";
+    cout << " Task 2 – Complexity Analysis\n";
+    cout << "=========================\n";
+
+    vector<int> sizes = {10, 100, 1000};
+    runExperiment(sizes);
 
     return 0;
 }
